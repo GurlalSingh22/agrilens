@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — AgriLens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root{--dark:#0f1f14;--green:#1a4731;--mid:#2d6a4f;--leaf:#52b788;--mint:#b7e4c7;--cream:#f8faf5;--gold:#d4a017;--white:#fff;--text:#1a2e22;--gray:#6b7280;--sidebar:240px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:#f1f5f2;color:var(--text);display:flex;min-height:100vh;}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar);background:var(--green);min-height:100vh;display:flex;flex-direction:column;padding:0;position:fixed;left:0;top:0;bottom:0;z-index:50;transition:transform 0.3s;}
+    .sidebar-brand{padding:1.8rem 1.5rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:0.6rem;}
+    .sidebar-brand i{color:var(--leaf);font-size:1.3rem;}
+    .sidebar-brand span{font-family:'Playfair Display',serif;font-size:1.2rem;color:white;font-weight:900;}
+    nav.side-nav{flex:1;padding:1.2rem 0;}
+    .nav-item{display:flex;align-items:center;gap:0.8rem;padding:0.85rem 1.5rem;color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.9rem;font-weight:600;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;}
+    .nav-item:hover,.nav-item.active{background:rgba(255,255,255,0.1);color:white;}
+    .nav-item.active{border-left:3px solid var(--leaf);}
+    .nav-item i{width:18px;text-align:center;}
+    .nav-divider{border:none;border-top:1px solid rgba(255,255,255,0.1);margin:0.8rem 1.5rem;}
+    .nav-item.danger{color:rgba(255,100,100,0.7);}
+    .nav-item.danger:hover{background:rgba(255,60,60,0.1);color:#ff6b6b;}
+    .sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid rgba(255,255,255,0.1);}
+    .admin-badge{display:flex;align-items:center;gap:0.7rem;}
+    .admin-avatar{width:36px;height:36px;background:var(--leaf);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-size:0.9rem;}
+    .admin-info .name{font-weight:700;color:white;font-size:0.88rem;}
+    .admin-info .role{font-size:0.73rem;color:rgba(255,255,255,0.5);}
+
+    /* MAIN */
+    .main{margin-left:var(--sidebar);flex:1;padding:2rem;min-width:0;}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+    .topbar h1{font-size:1.8rem;color:var(--dark);}
+    .topbar-right{display:flex;gap:0.8rem;align-items:center;}
+    .btn-sm{padding:0.5rem 1.1rem;border-radius:999px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+    .btn-primary{background:var(--green);color:white;}
+    .btn-primary:hover{background:var(--mid);}
+    .btn-outline{background:white;color:var(--text);border:1.5px solid #e5e7eb;}
+    .btn-outline:hover{border-color:var(--leaf);color:var(--leaf);}
+
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.2rem;margin-bottom:2rem;}
+    .stat-card{background:white;border-radius:18px;padding:1.4rem;border-bottom:4px solid;transition:transform 0.2s,box-shadow 0.2s;}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.07);}
+    .stat-card:nth-child(1){border-color:#3b82f6;}
+    .stat-card:nth-child(2){border-color:var(--leaf);}
+    .stat-card:nth-child(3){border-color:#a855f7;}
+    .stat-card:nth-child(4){border-color:var(--gold);}
+    .stat-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);margin-bottom:0.4rem;}
+    .stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--dark);}
+    .stat-trend{font-size:0.75rem;color:var(--leaf);margin-top:0.2rem;}
+
+    /* PANELS */
+    .panel-row{display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+    .panel{background:white;border-radius:18px;overflow:hidden;}
+    .panel-header{padding:1.2rem 1.4rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;}
+    .panel-header h3{font-size:1rem;color:var(--dark);}
+    .panel-body{padding:1.4rem;}
+
+    /* SOIL FORM */
+    .soil-form{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+    .soil-form input,.soil-form select{padding:0.75rem 1rem;border:1.5px solid #e5e7eb;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+    .soil-form input:focus{border-color:var(--leaf);}
+    .soil-form .full{grid-column:1/-1;}
+    .btn-add{padding:0.75rem 1.5rem;background:var(--green);color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.88rem;}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;}
+    thead th{background:#f8faf5;padding:0.75rem 1rem;text-align:left;font-size:0.73rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);font-weight:700;border-bottom:1.5px solid #e8f5ee;}
+    tbody td{padding:0.85rem 1rem;font-size:0.88rem;border-bottom:1px solid #f5f5f5;}
+    tbody tr:hover td{background:#fafcfa;}
+    tbody tr:last-child td{border-bottom:none;}
+    .badge{display:inline-block;padding:0.25rem 0.7rem;border-radius:999px;font-size:0.72rem;font-weight:700;}
+    .badge-farmer{background:#e8f5ee;color:var(--mid);}
+    .badge-buyer{background:#dbeafe;color:#1d4ed8;}
+    .badge-admin{background:#fef3c7;color:#92400e;}
+    .badge-active{display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--leaf);font-weight:600;}
+    .pulse{width:8px;height:8px;background:var(--leaf);border-radius:50%;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+    .btn-del{background:none;border:none;color:#ef4444;cursor:pointer;padding:0.3rem;font-size:0.9rem;transition:color 0.2s;}
+    .btn-del:hover{color:#dc2626;}
+
+    /* ACTIVITY */
+    .activity-item{display:flex;align-items:center;gap:1rem;padding:0.8rem 0;border-bottom:1px solid #f5f5f5;}
+    .activity-item:last-child{border-bottom:none;}
+    .activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .activity-text{font-size:0.88rem;color:var(--text);}
+    .activity-text span{font-weight:600;}
+    .activity-time{font-size:0.75rem;color:var(--gray);margin-left:auto;}
+
+    /* MOBILE */
+    .hamburger{display:none;background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text);position:fixed;top:1rem;left:1rem;z-index:200;background:white;padding:0.5rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40;}
+
+    @media(max-width:900px){
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:none;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .sidebar-overlay.open{display:block;}
+      .panel-row{grid-template-columns:1fr;}
+    }
+    @media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}.soil-form{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <i class="fa-solid fa-seedling"></i>
+    <span>AgriLens</span>
+  </div>
+  <nav class="side-nav">
+    <button class="nav-item active" onclick="showSection('dashboard',this)">
+      <i class="fa-solid fa-grid-2"></i> Dashboard
+    </button>
+    <button class="nav-item" onclick="showSection('soil',this)">
+      <i class="fa-solid fa-flask-vial"></i> Manage Soil Data
+    </button>
+    <button class="nav-item" onclick="showSection('users',this)">
+      <i class="fa-solid fa-users"></i> Manage Users
+    </button>
+    <button class="nav-item" onclick="showSection('listings',this)">
+      <i class="fa-solid fa-store"></i> Crop Listings
+    </button>
+    <hr class="nav-divider">
+    <a class="nav-item" href="index.html">
+      <i class="fa-solid fa-globe"></i> Back to Website
+    </a>
+    <a class="nav-item danger" href="login.html">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="admin-info">
+        <div class="name">Admin</div>
+        <div class="role">Super Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- DASHBOARD SECTION -->
+  <div id="sec-dashboard">
+    <div class="topbar">
+      <h1>Dashboard Overview</h1>
+      <div class="topbar-right">
+        <span style="background:white;padding:0.5rem 1rem;border-radius:999px;font-size:0.82rem;border:1px solid #e5e7eb;color:var(--gray);">
+          <i class="fa-solid fa-calendar-days" style="margin-right:0.3rem;"></i>
+          <span id="dateStr"></span>
+        </span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-num" id="totalUsers">47</div>
+        <div class="stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +8 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Farmers</div>
+        <div class="stat-num" id="totalFarmers">29</div>
+        <div class="stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +5 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Soil Districts</div>
+        <div class="stat-num" id="totalDistricts">20</div>
+        <div class="stat-trend"><i class="fa-solid fa-database"></i> Punjab covered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Buyers</div>
+        <div class="stat-num" id="totalBuyers">18</div>
+        <div class="stat-trend"><i class="fa-solid fa-arrow-trend-up"></i> +3 this week</div>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <div class="panel">
+        <div class="panel-header"><h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--gray);margin-right:0.5rem;"></i>Recent Registrations</h3></div>
+        <div style="overflow-x:auto;">
+          <table id="usersTable">
+            <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3><i class="fa-solid fa-bolt" style="color:var(--gold);margin-right:0.5rem;"></i>Recent Activity</h3></div>
+        <div class="panel-body" id="activityFeed"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOIL SECTION -->
+  <div id="sec-soil" style="display:none;">
+    <div class="topbar"><h1>Manage Soil Data</h1></div>
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-header"><h3><i class="fa-solid fa-plus-circle" style="color:var(--leaf);margin-right:0.5rem;"></i>Add New District</h3></div>
+      <div class="panel-body">
+        <div class="soil-form">
+          <input type="text" id="dName" placeholder="District Name" required>
+          <input type="text" id="dNpk" placeholder="NPK (e.g. N:85 P:45 K:40)">
+          <input type="text" id="dPh" placeholder="pH Level (e.g. 6.8)">
+          <input type="text" id="dStatus" placeholder="Condition (e.g. Healthy)">
+          <input type="text" id="dCrops" placeholder="Recommended Crops" class="full">
+          <button class="btn-add full" onclick="addDistrict()"><i class="fa-solid fa-save" style="margin-right:0.4rem;"></i>Save District</button>
+        </div>
+        <div id="soilMsg" style="margin-top:0.8rem;font-size:0.85rem;color:var(--leaf);"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h3>All Districts (<span id="distCount">0</span>)</h3></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>District</th><th>NPK</th><th>pH</th><th>Status</th><th>Crops</th><th>Action</th></tr></thead>
+          <tbody id="soilBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS SECTION -->
+  <div id="sec-users" style="display:none;">
+    <div class="topbar"><h1>Manage Users</h1></div>
+    <div class="panel">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+          <tbody id="allUsersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTINGS SECTION -->
+  <div id="sec-listings" style="display:none;">
+    <div class="topbar"><h1>Crop Listings</h1></div>
+    <div class="panel">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Crop</th><th>Farmer</th><th>Price/Qtl</th><th>Location</th><th>Qty</th></tr></thead>
+          <tbody id="listingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// DATA
+let soilDistricts = [
+  {id:1,name:"Amritsar",npk:"N:85 P:45 K:40",ph:"6.8",status:"Healthy",crops:"Wheat, Rice, Maize"},
+  {id:2,name:"Ludhiana",npk:"N:92 P:50 K:55",ph:"7.1",status:"Good",crops:"Wheat, Mustard, Potato"},
+  {id:3,name:"Patiala",npk:"N:78 P:38 K:42",ph:"7.4",status:"Moderate",crops:"Wheat, Rice, Sunflower"},
+  {id:4,name:"Jalandhar",npk:"N:88 P:46 K:48",ph:"6.9",status:"Healthy",crops:"Wheat, Rice, Vegetables"},
+  {id:5,name:"Bathinda",npk:"N:65 P:30 K:38",ph:"8.1",status:"Alkaline",crops:"Wheat, Cotton, Sunflower"},
+  {id:6,name:"Gurdaspur",npk:"N:90 P:48 K:50",ph:"6.7",status:"Excellent",crops:"Rice, Wheat, Sugarcane"},
+  {id:7,name:"Hoshiarpur",npk:"N:70 P:35 K:45",ph:"6.5",status:"Good",crops:"Potato, Ginger, Wheat"},
+  {id:8,name:"Kapurthala",npk:"N:86 P:47 K:49",ph:"6.9",status:"Excellent",crops:"Rice, Wheat, Mango"},
+];
+
+const USERS = [
+  {name:"Gurpreet Singh",phone:"9876543210",role:"farmer",joined:"Jan 12, 2025"},
+  {name:"Harjinder Kaur",phone:"9812345678",role:"farmer",joined:"Jan 15, 2025"},
+  {name:"Rajvir Dhaliwal",phone:"9898989898",role:"farmer",joined:"Jan 18, 2025"},
+  {name:"Sukhwinder Mann",phone:"9911223344",role:"buyer",joined:"Feb 2, 2025"},
+  {name:"Manpreet Gill",phone:"9855667788",role:"buyer",joined:"Feb 5, 2025"},
+  {name:"Balwant Rana",phone:"9765432109",role:"farmer",joined:"Feb 8, 2025"},
+  {name:"Daljeet Brar",phone:"9878787878",role:"farmer",joined:"Mar 1, 2025"},
+  {name:"Navneet Randhawa",phone:"9856565656",role:"buyer",joined:"Mar 12, 2025"},
+];
+
+const LISTINGS = [
+  {crop:"Basmati Rice",farmer:"Gurpreet Singh",price:"₹2,400",location:"Amritsar",qty:"120 Qtl"},
+  {crop:"Wheat (Sharbati)",farmer:"Harjinder Kaur",price:"₹2,100",location:"Ludhiana",qty:"200 Qtl"},
+  {crop:"Mustard (Sarson)",farmer:"Rajvir Dhaliwal",price:"₹5,500",location:"Bathinda",qty:"80 Qtl"},
+  {crop:"Fresh Tomatoes",farmer:"Sukhwinder Mann",price:"₹800",location:"Patiala",qty:"50 Qtl"},
+  {crop:"Potato (Aloo)",farmer:"Balwant Rana",price:"₹600",location:"Hoshiarpur",qty:"500 Qtl"},
+  {crop:"Alphonso Mangoes",farmer:"Daljeet Brar",price:"₹12,000",location:"Kapurthala",qty:"20 Qtl"},
+];
+
+const ACTIVITY = [
+  {color:"#52b788",text:"<span>Gurpreet Singh</span> listed Basmati Rice",time:"2m ago"},
+  {color:"#3b82f6",text:"<span>Manpreet Gill</span> registered as Buyer",time:"18m ago"},
+  {color:"#a855f7",text:"Admin added Gurdaspur soil data",time:"1h ago"},
+  {color:"#f59e0b",text:"<span>Harjinder Kaur</span> updated crop price",time:"2h ago"},
+  {color:"#52b788",text:"<span>Daljeet Brar</span> listed Alphonso Mangoes",time:"3h ago"},
+  {color:"#ef4444",text:"District Fazilka pH data updated",time:"5h ago"},
+];
+
+function renderAll() {
+  // Users table (recent 5)
+  document.getElementById('usersBody').innerHTML = USERS.slice(0,5).map(u => `
+    <tr>
+      <td style="font-weight:600">${u.name}</td>
+      <td style="color:var(--gray)">${u.phone}</td>
+      <td><span class="badge badge-${u.role}">${u.role.toUpperCase()}</span></td>
+      <td><span class="badge-active"><span class="pulse"></span>Active</span></td>
+    </tr>`).join('');
+
+  // All users
+  document.getElementById('allUsersBody').innerHTML = USERS.map(u => `
+    <tr>
+      <td style="font-weight:600">${u.name}</td>
+      <td style="color:var(--gray)">${u.phone}</td>
+      <td><span class="badge badge-${u.role}">${u.role.toUpperCase()}</span></td>
+      <td style="color:var(--gray);font-size:0.82rem">${u.joined}</td>
+      <td><span class="badge-active"><span class="pulse"></span>Active</span></td>
+    </tr>`).join('');
+
+  // Activity
+  document.getElementById('activityFeed').innerHTML = ACTIVITY.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.color}"></div>
+      <div class="activity-text">${a.text}</div>
+      <div class="activity-time">${a.time}</div>
+    </div>`).join('');
+
+  // Listings
+  document.getElementById('listingsBody').innerHTML = LISTINGS.map(l => `
+    <tr>
+      <td style="font-weight:600">${l.crop}</td>
+      <td>${l.farmer}</td>
+      <td><span style="color:var(--leaf);font-weight:700">${l.price}</span></td>
+      <td style="color:var(--gray)">${l.location}</td>
+      <td style="color:var(--gray)">${l.qty}</td>
+    </tr>`).join('');
+
+  renderSoil();
+}
+
+function renderSoil() {
+  document.getElementById('distCount').textContent = soilDistricts.length;
+  document.getElementById('totalDistricts').textContent = soilDistricts.length;
+  document.getElementById('soilBody').innerHTML = soilDistricts.map(d => `
+    <tr>
+      <td style="font-weight:600">${d.name}</td>
+      <td style="color:var(--gray)">${d.npk}</td>
+      <td>${d.ph}</td>
+      <td><span class="badge" style="background:#e8f5ee;color:var(--mid)">${d.status}</span></td>
+      <td style="color:var(--gray);font-size:0.82rem">${d.crops}</td>
+      <td><button class="btn-del" onclick="deleteDistrict(${d.id})" title="Delete"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+function addDistrict() {
+  const name = document.getElementById('dName').value.trim();
+  const npk = document.getElementById('dNpk').value.trim();
+  const ph = document.getElementById('dPh').value.trim();
+  const status = document.getElementById('dStatus').value.trim() || 'Good';
+  const crops = document.getElementById('dCrops').value.trim();
+  if (!name) { document.getElementById('soilMsg').innerHTML = '⚠️ District name is required'; return; }
+  const newId = Math.max(...soilDistricts.map(d=>d.id))+1;
+  soilDistricts.push({id:newId,name,npk:npk||'—',ph:ph||'—',status,crops:crops||'—'});
+  renderSoil();
+  ['dName','dNpk','dPh','dStatus','dCrops'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('soilMsg').innerHTML = '✅ District added successfully!';
+  setTimeout(() => document.getElementById('soilMsg').innerHTML='',3000);
+}
+
+function deleteDistrict(id) {
+  if (!confirm('Delete this district data?')) return;
+  soilDistricts = soilDistricts.filter(d => d.id !== id);
+  renderSoil();
+}
+
+function showSection(sec, btn) {
+  ['dashboard','soil','users','listings'].forEach(s => {
+    document.getElementById('sec-'+s).style.display = s===sec?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(window.innerWidth<=900) toggleSidebar();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// Date
+document.getElementById('dateStr').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+renderAll();
+</script>
+</body>
+</html>

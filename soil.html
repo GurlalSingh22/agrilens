@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soil Intelligence — AgriLens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root{--dark:#0f1f14;--green:#1a4731;--mid:#2d6a4f;--leaf:#52b788;--mint:#b7e4c7;--cream:#f8faf5;--gold:#d4a017;--white:#ffffff;--text:#1a2e22;--muted:#5a7a66;--gray:#6b7280;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
+    nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(16px);border-bottom:1px solid #e5e7eb;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:68px;}
+    .nav-brand{display:flex;align-items:center;gap:8px;text-decoration:none;}
+    .nav-brand i{color:var(--leaf);font-size:1.4rem;}
+    .nav-brand span{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--green);font-weight:900;}
+    .nav-links{display:flex;align-items:center;gap:2rem;}
+    .nav-links a{text-decoration:none;color:var(--text);font-weight:500;font-size:0.95rem;transition:color 0.2s;}
+    .nav-links a.active,.nav-links a:hover{color:var(--leaf);}
+    .btn-nav{background:var(--green);color:white!important;padding:0.5rem 1.4rem;border-radius:999px;font-weight:600!important;}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text);}
+    .mobile-menu{display:none;position:fixed;inset:0;top:68px;background:white;z-index:99;padding:2rem;flex-direction:column;gap:1.5rem;}
+    .mobile-menu.open{display:flex;}
+    .mobile-menu a{font-size:1.1rem;font-weight:600;text-decoration:none;color:var(--text);padding:0.8rem 0;border-bottom:1px solid #f0f0f0;}
+
+    .page-header{background:linear-gradient(135deg,var(--dark),var(--green));color:white;padding:3rem 2rem 5rem;text-align:center;}
+    .page-header .badge{display:inline-block;background:rgba(82,183,136,0.2);border:1px solid rgba(82,183,136,0.4);color:var(--mint);font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:0.4rem 1.2rem;border-radius:999px;margin-bottom:1rem;}
+    .page-header h1{font-size:2.4rem;margin-bottom:0.5rem;}
+    .page-header p{color:rgba(255,255,255,0.65);font-size:1rem;}
+
+    .main-content{max-width:760px;margin:-2rem auto 4rem;padding:0 1.5rem;}
+
+    /* TAB SWITCHER */
+    .tab-bar{background:white;border-radius:20px;display:flex;box-shadow:0 4px 24px rgba(0,0,0,0.07);overflow:hidden;margin-bottom:0;}
+    .tab-btn{flex:1;padding:1.2rem;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;color:var(--gray);display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;border-bottom:3px solid transparent;}
+    .tab-btn.active{color:var(--leaf);border-bottom-color:var(--leaf);background:#f0faf4;}
+
+    .tab-panel{background:white;border-radius:0 0 20px 20px;padding:2rem;box-shadow:0 4px 24px rgba(0,0,0,0.07);display:none;}
+    .tab-panel.active{display:block;animation:fadeIn 0.3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+    /* FORM ELEMENTS */
+    label{display:block;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:0.4rem;}
+    select,input[type=number],input[type=text]{width:100%;padding:0.9rem 1rem;border:1.5px solid #e5e7eb;border-radius:14px;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;background:#f8faf5;transition:border-color 0.2s;}
+    select:focus,input:focus{border-color:var(--leaf);background:white;}
+    .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:1.2rem;}
+    .form-group{margin-bottom:1.2rem;}
+    .btn-analyze{width:100%;background:var(--green);color:white;border:none;padding:1.1rem;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-top:1.2rem;}
+    .btn-analyze:hover{background:var(--mid);}
+    .btn-ai{width:100%;background:linear-gradient(135deg,#3b82f6,#6366f1);color:white;border:none;padding:1.1rem;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s;display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-top:1.2rem;}
+    .btn-ai:hover{opacity:0.9;}
+
+    /* RESULT CARDS */
+    .result-box{margin-top:1.5rem;background:#f0faf4;border-radius:18px;padding:1.5rem;border:1.5px solid #b7e4c7;animation:fadeIn 0.4s ease;}
+    .result-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--green);margin-bottom:1rem;}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1rem;}
+    .result-stat{background:white;border-radius:12px;padding:0.9rem 1rem;}
+    .result-stat-label{font-size:0.72rem;text-transform:uppercase;font-weight:700;color:var(--gray);letter-spacing:0.05em;}
+    .result-stat-value{font-size:1.1rem;font-weight:700;color:var(--dark);margin-top:0.2rem;}
+    .result-crop{background:white;border-radius:12px;padding:1rem 1.2rem;border-left:4px solid var(--leaf);}
+    .result-crop-label{font-size:0.72rem;text-transform:uppercase;font-weight:700;color:var(--gray);letter-spacing:0.05em;}
+    .result-crop-name{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--leaf);margin-top:0.2rem;}
+    .result-crop-note{font-size:0.82rem;color:var(--gray);margin-top:0.3rem;}
+    .result-status{font-size:0.8rem;color:var(--muted);margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid #d0ead8;}
+
+    /* AI RESULT */
+    .ai-result{margin-top:1.5rem;border-radius:18px;overflow:hidden;animation:fadeIn 0.4s ease;}
+    .ai-header{background:linear-gradient(135deg,var(--mid),var(--green));padding:2rem;text-align:center;color:white;}
+    .ai-icon{width:72px;height:72px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;}
+    .ai-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.75;margin-bottom:0.2rem;}
+    .ai-crop-name{font-family:'Playfair Display',serif;font-size:2rem;}
+    .ai-body{background:white;padding:1.5rem;}
+    .ai-desc{color:var(--gray);line-height:1.7;margin-bottom:1.2rem;font-size:0.95rem;}
+    .ai-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+    .ai-stat{background:#f8faf5;border-radius:12px;padding:0.9rem;text-align:center;}
+    .ai-stat-label{font-size:0.72rem;text-transform:uppercase;font-weight:700;color:var(--gray);}
+    .ai-stat-value{font-size:1rem;font-weight:700;color:var(--dark);margin-top:0.2rem;}
+    .ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:1.2rem;}
+    .btn-secondary{padding:0.9rem;border:2px solid var(--leaf);border-radius:14px;color:var(--leaf);font-weight:700;font-size:0.9rem;cursor:pointer;background:white;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+    .btn-secondary:hover{background:#f0faf4;}
+    .btn-success{padding:0.9rem;border:none;border-radius:14px;background:var(--green);color:white;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.2s;}
+    .btn-success:hover{background:var(--mid);}
+
+    /* DISTRICT DATA TABLE */
+    .district-info{margin-top:1.5rem;overflow:hidden;border-radius:16px;border:1.5px solid #e8f5ee;}
+    .district-info table{width:100%;border-collapse:collapse;}
+    .district-info th{background:var(--green);color:white;padding:0.8rem 1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;text-align:left;}
+    .district-info td{padding:0.8rem 1rem;font-size:0.9rem;border-bottom:1px solid #f0f0f0;}
+    .district-info tr:last-child td{border-bottom:none;}
+    .district-info tr:nth-child(even) td{background:#f8faf5;}
+
+    footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:2.5rem 2rem;text-align:center;}
+    footer .brand{font-family:'Playfair Display',serif;color:var(--leaf);font-size:1.4rem;font-weight:900;}
+    footer .copy{font-size:0.8rem;margin-top:0.5rem;}
+
+    @media(max-width:768px){.nav-links{display:none;}.hamburger{display:block;}.result-grid,.ai-stats,.ai-actions{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-brand"><i class="fa-solid fa-seedling"></i><span>AgriLens</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="soil.html" class="active">Soil Intelligence</a>
+    <a href="login.html" class="btn-nav">Login</a>
+  </div>
+  <button class="hamburger" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="marketplace.html">Marketplace</a>
+  <a href="soil.html">Soil Intelligence</a>
+  <a href="login.html" style="color:var(--leaf);">Login</a>
+</div>
+
+<div class="page-header">
+  <span class="badge"><i class="fa-solid fa-flask-vial"></i> &nbsp;AI-Powered</span>
+  <h1>Soil Intelligence</h1>
+  <p>District-wise analysis & AI crop prediction from your soil parameters</p>
+</div>
+
+<div class="main-content">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('district',this)">
+      <i class="fa-solid fa-map-location-dot"></i> District Wise
+    </button>
+    <button class="tab-btn" onclick="switchTab('lab',this)">
+      <i class="fa-solid fa-microchip"></i> AI Prediction
+    </button>
+  </div>
+
+  <!-- DISTRICT TAB -->
+  <div class="tab-panel active" id="districtTab">
+    <div class="form-group">
+      <label>Select Punjab District</label>
+      <select id="districtSelect">
+        <option value="">— Choose a district —</option>
+        <option value="amritsar">Amritsar</option>
+        <option value="ludhiana">Ludhiana</option>
+        <option value="patiala">Patiala</option>
+        <option value="jalandhar">Jalandhar</option>
+        <option value="bathinda">Bathinda</option>
+        <option value="mohali">Mohali (SAS Nagar)</option>
+        <option value="gurdaspur">Gurdaspur</option>
+        <option value="hoshiarpur">Hoshiarpur</option>
+        <option value="ropar">Ropar (Rupnagar)</option>
+        <option value="faridkot">Faridkot</option>
+        <option value="moga">Moga</option>
+        <option value="muktsar">Muktsar</option>
+        <option value="fazilka">Fazilka</option>
+        <option value="firozpur">Firozpur</option>
+        <option value="kapurthala">Kapurthala</option>
+        <option value="sangrur">Sangrur</option>
+        <option value="nawanshahr">Nawanshahr (SBS Nagar)</option>
+        <option value="mansa">Mansa</option>
+        <option value="fatehgarh">Fatehgarh Sahib</option>
+        <option value="barnala">Barnala</option>
+      </select>
+    </div>
+    <button class="btn-analyze" onclick="analyzeDistrict()">
+      <i class="fa-solid fa-magnifying-glass-chart"></i> Analyze Regional Soil Health
+    </button>
+    <div id="districtResult"></div>
+  </div>
+
+  <!-- AI TAB -->
+  <div class="tab-panel" id="labTab">
+    <p style="color:var(--gray);font-size:0.9rem;margin-bottom:1.2rem;background:#f8faf5;padding:0.8rem 1rem;border-radius:12px;border-left:3px solid var(--leaf);">
+      <i class="fa-solid fa-circle-info" style="color:var(--leaf);margin-right:0.4rem;"></i>
+      Enter your soil lab report values below. Our AI will recommend the most suitable crop.
+    </p>
+    <div class="form-row">
+      <div class="form-group" style="margin:0">
+        <label>Nitrogen (N)</label>
+        <input type="number" id="nitrogen" placeholder="e.g. 90" min="0" max="200">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Phosphorus (P)</label>
+        <input type="number" id="phosphorus" placeholder="e.g. 42" min="0" max="200">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Potassium (K)</label>
+        <input type="number" id="potassium" placeholder="e.g. 43" min="0" max="200">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin:0">
+        <label>pH Level</label>
+        <input type="number" id="ph" placeholder="e.g. 6.5" step="0.1" min="0" max="14">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Temperature (°C)</label>
+        <input type="number" id="temp" placeholder="e.g. 28" min="0" max="60">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Humidity (%)</label>
+        <input type="number" id="humidity" placeholder="e.g. 65" min="0" max="100">
+      </div>
+    </div>
+    <button class="btn-ai" onclick="runAI()">
+      <i class="fa-solid fa-microchip"></i> Run AI Prediction
+    </button>
+    <div id="aiResult"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="brand"><i class="fa-solid fa-seedling"></i> AgriLens</div>
+  <div class="copy">© 2025 AgriLens · Soil Intelligence Module</div>
+</footer>
+
+<script>
+const DISTRICT_DATA = {
+  amritsar:{name:"Amritsar",npk:"N:85 P:45 K:40",ph:"6.8",status:"Healthy",crops:"Wheat, Rice, Maize, Sugarcane",note:"Sandy loam soil, ideal for paddy cultivation. High organic matter content."},
+  ludhiana:{name:"Ludhiana",npk:"N:92 P:50 K:55",ph:"7.1",status:"Good",crops:"Wheat, Mustard, Potato, Vegetables",note:"Rich alluvial soil. One of Punjab's most fertile districts."},
+  patiala:{name:"Patiala",npk:"N:78 P:38 K:42",ph:"7.4",status:"Moderate",crops:"Wheat, Rice, Sunflower, Maize",note:"Slightly alkaline. Drainage improvement recommended for higher yields."},
+  jalandhar:{name:"Jalandhar",npk:"N:88 P:46 K:48",ph:"6.9",status:"Healthy",crops:"Wheat, Rice, Vegetables, Maize",note:"Deep loamy alluvial soil. Excellent for horticulture and field crops."},
+  bathinda:{name:"Bathinda",npk:"N:65 P:30 K:38",ph:"8.1",status:"Alkaline",crops:"Wheat, Cotton, Sunflower, Kinnow",note:"Sandy loam, slightly alkaline. Cotton and sunflower perform well here."},
+  mohali:{name:"Mohali (SAS Nagar)",npk:"N:80 P:42 K:44",ph:"7.0",status:"Good",crops:"Wheat, Vegetables, Herbs, Flowers",note:"Balanced soil. Growing horticultural activity due to urban demand."},
+  gurdaspur:{name:"Gurdaspur",npk:"N:90 P:48 K:50",ph:"6.7",status:"Excellent",crops:"Rice, Wheat, Sugarcane, Green Peas",note:"Excellent water retention. One of the best districts for rice cultivation."},
+  hoshiarpur:{name:"Hoshiarpur",npk:"N:70 P:35 K:45",ph:"6.5",status:"Good",crops:"Potato, Ginger, Wheat, Maize",note:"Sub-mountainous loam. Ideal for potato and ginger cultivation."},
+  ropar:{name:"Ropar (Rupnagar)",npk:"N:75 P:40 K:42",ph:"6.8",status:"Good",crops:"Wheat, Maize, Vegetables, Pulses",note:"Silty clay loam. Good moisture retention along Sutlej belt."},
+  faridkot:{name:"Faridkot",npk:"N:72 P:36 K:40",ph:"7.6",status:"Moderate",crops:"Wheat, Cotton, Mustard",note:"Light-textured sandy soil. Suitable for cotton in Kharif season."},
+  moga:{name:"Moga",npk:"N:82 P:44 K:46",ph:"7.2",status:"Good",crops:"Wheat, Rice, Maize, Vegetables",note:"Fertile alluvial plain. Good groundwater availability."},
+  muktsar:{name:"Muktsar",npk:"N:68 P:32 K:36",ph:"7.8",status:"Moderate",crops:"Wheat, Mustard, Sunflower",note:"Sandy to sandy-loam. Needs irrigation management for best yields."},
+  fazilka:{name:"Fazilka",npk:"N:60 P:28 K:35",ph:"8.2",status:"Alkaline",crops:"Wheat, Kinnow, Moong Dal, Cotton",note:"High pH zone. Gypsum treatment recommended for crop health."},
+  firozpur:{name:"Firozpur",npk:"N:74 P:38 K:44",ph:"7.5",status:"Good",crops:"Wheat, Rice, Cotton, Sugarcane",note:"Alluvial soil along Sutlej. Rich in potassium."},
+  kapurthala:{name:"Kapurthala",npk:"N:86 P:47 K:49",ph:"6.9",status:"Excellent",crops:"Rice, Wheat, Mango, Vegetables",note:"Deep fertile loam. Famous for rice and mango orchards."},
+  sangrur:{name:"Sangrur",npk:"N:80 P:40 K:45",ph:"7.3",status:"Good",crops:"Wheat, Rice, Sunflower, Maize",note:"Good alluvial plain. Balanced NPK for multiple crops."},
+  nawanshahr:{name:"Nawanshahr (SBS Nagar)",npk:"N:76 P:39 K:43",ph:"6.6",status:"Good",crops:"Wheat, Potato, Vegetables, Maize",note:"Sub-mountainous belt. Cool climate favors potato and vegetables."},
+  mansa:{name:"Mansa",npk:"N:67 P:31 K:38",ph:"7.9",status:"Moderate",crops:"Wheat, Cotton, Sunflower",note:"Light sandy soil. Water management crucial for productivity."},
+  fatehgarh:{name:"Fatehgarh Sahib",npk:"N:83 P:43 K:47",ph:"7.0",status:"Good",crops:"Wheat, Rice, Maize, Sugarcane",note:"Central Punjab alluvial. Consistent fertility across the district."},
+  barnala:{name:"Barnala",npk:"N:79 P:41 K:46",ph:"7.2",status:"Good",crops:"Wheat, Rice, Cotton, Pulses",note:"Good drainage loamy soil. Multi-crop district."},
+};
+
+function analyzeDistrict() {
+  const key = document.getElementById('districtSelect').value;
+  const res = document.getElementById('districtResult');
+  if (!key) { res.innerHTML = '<p style="color:var(--gold);margin-top:1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Please select a district first.</p>'; return; }
+  const d = DISTRICT_DATA[key];
+  res.innerHTML = `
+    <div class="result-box">
+      <div class="result-title"><i class="fa-solid fa-map-pin" style="color:var(--leaf);margin-right:0.4rem;"></i>Results for ${d.name}</div>
+      <div class="result-grid">
+        <div class="result-stat"><div class="result-stat-label">NPK Levels</div><div class="result-stat-value">${d.npk}</div></div>
+        <div class="result-stat"><div class="result-stat-label">pH Value</div><div class="result-stat-value">${d.ph}</div></div>
+      </div>
+      <div class="result-crop">
+        <div class="result-crop-label">Recommended Crops</div>
+        <div class="result-crop-name">${d.crops}</div>
+        <div class="result-crop-note">${d.note}</div>
+      </div>
+      <div class="result-status"><i class="fa-solid fa-circle-check" style="color:var(--leaf);"></i> Soil Condition: <strong>${d.status}</strong></div>
+    </div>`;
+}
+
+const CROP_AI = [
+  {name:"Rice",emoji:"🌾",desc:"Your soil's high nitrogen and ideal pH create perfect conditions for paddy cultivation. High success rate in similar conditions.",soilType:"Clay Loam",success:"96%",icon:"fa-bowl-rice",condition:(n,p,k,ph,t,h)=>n>80&&ph<7.5&&h>60},
+  {name:"Wheat (Kanak)",emoji:"🌾",desc:"Well-balanced NPK with moderate pH makes your land ideal for wheat. Punjab's most reliable crop for your soil profile.",soilType:"Loamy",success:"94%",icon:"fa-wheat-awn",condition:(n,p,k,ph,t,h)=>n>60&&ph>=6.5&&ph<=7.8&&t>=15&&t<=30},
+  {name:"Maize",emoji:"🌽",desc:"Warm temperature and adequate potassium signal strong suitability for maize. Hybrid varieties will perform exceptionally.",soilType:"Sandy Loam",success:"89%",icon:"fa-seedling",condition:(n,p,k,ph,t,h)=>t>25&&k>50&&ph<7.5},
+  {name:"Cotton",emoji:"🪴",desc:"High potassium and warm temperatures favour cotton. Ensure adequate drainage and your yields will be excellent.",soilType:"Black Cotton Soil",success:"85%",icon:"fa-leaf",condition:(n,p,k,ph,t,h)=>k>80&&t>28&&ph>6.5},
+  {name:"Mustard (Sarson)",emoji:"🟡",desc:"Moderate nitrogen with slightly alkaline pH matches mustard's preferred growth environment. Good oil yield expected.",soilType:"Sandy Loam",success:"88%",icon:"fa-circle",condition:(n,p,k,ph,t,h)=>n<80&&ph>=7&&t<=25},
+  {name:"Potato",emoji:"🥔",desc:"Cool temperatures, good phosphorus levels and slightly acidic soil indicate excellent potato-growing potential.",soilType:"Loamy Clay",success:"91%",icon:"fa-seedling",condition:(n,p,k,ph,t,h)=>p>40&&t<22&&ph<7},
+  {name:"Sugarcane",emoji:"🎋",desc:"High nitrogen, warm climate, and good moisture make your land well-suited for sugarcane cultivation.",soilType:"Deep Loam",success:"87%",icon:"fa-wheat-awn",condition:(n,p,k,ph,t,h)=>n>90&&t>28&&h>70},
+];
+
+function runAI() {
+  const n = parseFloat(document.getElementById('nitrogen').value)||0;
+  const p = parseFloat(document.getElementById('phosphorus').value)||0;
+  const k = parseFloat(document.getElementById('potassium').value)||0;
+  const ph = parseFloat(document.getElementById('ph').value)||7;
+  const t = parseFloat(document.getElementById('temp').value)||25;
+  const h = parseFloat(document.getElementById('humidity').value)||60;
+
+  if (!n && !p && !k) {
+    document.getElementById('aiResult').innerHTML = '<p style="color:var(--gold);margin-top:1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Please enter at least N, P, K values.</p>';
+    return;
+  }
+
+  let recommended = CROP_AI.find(c => c.condition(n,p,k,ph,t,h)) || CROP_AI[1];
+
+  document.getElementById('aiResult').innerHTML = `
+    <div class="ai-result">
+      <div class="ai-header">
+        <div class="ai-icon"><i class="fa-solid ${recommended.icon}" style="font-size:2rem;"></i></div>
+        <div class="ai-label">AI Recommended Crop</div>
+        <div class="ai-crop-name">${recommended.emoji} ${recommended.name}</div>
+      </div>
+      <div class="ai-body">
+        <p class="ai-desc">${recommended.desc}</p>
+        <div class="ai-stats">
+          <div class="ai-stat"><div class="ai-stat-label">Soil Type</div><div class="ai-stat-value">${recommended.soilType}</div></div>
+          <div class="ai-stat"><div class="ai-stat-label">Success Rate</div><div class="ai-stat-value" style="color:var(--leaf);">${recommended.success}</div></div>
+        </div>
+        <div class="ai-actions">
+          <button class="btn-secondary" onclick="document.getElementById('aiResult').innerHTML=''">Test Another</button>
+          <button class="btn-success" onclick="window.location='marketplace.html'">Browse Market <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tab+'Tab').classList.add('active');
+}
+
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+</script>
+</body>
+</html>
